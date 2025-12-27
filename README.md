@@ -1,4 +1,4 @@
-# Dynamic ADAS: Real-Time Object Detection with Model Switching
+# Edge Ready ADAS: Real-Time Object Detection with Model Switching
 
 This project implements a **real-time object detection system** for **Advanced Driver Assistance Systems (ADAS)** that dynamically switches between lightweight and heavyweight YOLO models based on system resource availability (CPU and RAM usage).
 
@@ -24,7 +24,7 @@ To reproduce or test this project, make sure to have the following:
 ### 🔸 Dataset
 
 - **[BDD100K](https://bdd-data.berkeley.edu/):**  
-  A diverse driving dataset used for training the YOLO models. \
+  A diverse driving dataset used for training the YOLO models.
 
   📥 Download Link: [https://bdd-data.berkeley.edu](https://bdd-data.berkeley.edu)
 
@@ -42,11 +42,40 @@ We used official implementations of two YOLO models:
 
 > Note: Ensure you clone the YOLOv7 repository and install the ultralytics package using pip install ultralytics before running inference.
 
+### 🚀 How to Run
+
+To start the adaptive ADAS system, run the master controller script.  
+This script will automatically monitor your system resources and switch between the **Heavy (YOLOv7)** and **Light (YOLO11)** models.
+
+```bash
+python pesutil.py
+```
+
+## 🛠️ What Happens During Execution
+### 🔍 Hardware Monitoring
+The script uses psutil to check your real-time CPU and RAM usage.
+
+### 🤖 Dynamic Selection
+If resources are Low (High CPU/RAM), it triggers YOLO11S via yolov11/predict_11s.py.
+
+If resources are Sufficient, it triggers YOLOv7X via yolov7/detect.py.
+
+### 📁 Output
+Results are saved in the runs/ directory.
+
+Outputs are categorized based on the model used.
+
 ## 🎥 Results
 
-![11s](runs\yolov11_output\210801775.jpg)
+For 11s:
 
-![7x](runs\yolov7_output\labels\210801775.jpg)
+![11s](runs/yolov11_output/210801775.jpg)
+
+For 7x:
+
+![7x](runs/yolov7_output/labels/210801775.jpg)
+
+Overall model results:
 
 ![Sample Output](overall_model_result.png)
 Detailed results are there under results of their respective model.
