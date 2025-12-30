@@ -4,18 +4,28 @@ This project implements a **real-time object detection system** for **Advanced D
 
 ## 🚗 Project Objective
 
-To optimize object detection performance on **edge devices** (like Jetson Nano, Raspberry Pi) by:
-- Using a **lightweight model (YOLOv11S)** when resources are low
-- Switching to a **heavyweight model (YOLOv7X)** when resources are available
-- Monitoring system stats (CPU/RAM) in real-time using `psutil`
+Optimize object detection performance on resource-constrained edge devices (e.g., Jetson Nano, Raspberry Pi) by:
+
+- Implementing an **adaptive model-switching strategy** that balances safety (accuracy) with system health (latency)
+- Using a **lightweight model (YOLOv11S)** to maintain baseline detection reliability during high system load
+- Scaling to a **high-precision model (YOLOv7X)** when sufficient hardware resources are available
+- Driving switching decisions using **real-time hardware telemetry** collected via `psutil`
+
+---
 
 ## 🧠 Key Features
 
-- ✅ **Dynamic model switching logic** using `psutil`
-- ✅ **Real-time object detection** (cars, pedestrians, traffic objects)
-- ✅ **YOLOv7X and YOLOv11S models trained on BDD100K**
-- ✅ **Resource monitoring dashboard**
-- ✅ Optimized for edge deployment using TensorRT and ONNX Runtime (WIP)
+- **Intelligent Adaptive Controller**  
+  A custom `ModelManager` class monitors CPU and RAM usage in real time and orchestrates model transitions based on system conditions.
+
+- **Hysteresis-Based Switching**  
+  Prevents inference jitter by requiring system resources to remain stable for a predefined duration (e.g., 5 seconds) before switching models.
+
+- **Asynchronous Process Management**  
+  Uses non-blocking execution to ensure continuous system monitoring while handling heavy model initialization and termination.
+
+- **BDD100K-Trained Models**  
+  Includes YOLOv7X and YOLOv11S models fine-tuned on the BDD100K dataset for diverse driving environments.
 
 ## 📚 Project Requirements
 
@@ -55,9 +65,15 @@ python pesutil.py
 ### 🔍 Hardware Monitoring
 The script uses psutil to check your real-time CPU and RAM usage.
 
-### 🤖 Dynamic Selection
-If resources are Low (High CPU/RAM), it triggers YOLO11S via yolov11/predict_11s.py.
+### 🤖 Dynamic Selection & Advanced Controller Logic
+The system doesn't just switch models blindly; it uses an Adaptive Controller to manage hardware constraints:
 
+- **Hysteresis & Smoothing:** To prevent rapidly switching between models due to momentary CPU spikes, a stability threshold is implemented. The system must detect consistent resource availability for a set duration (e.g., 5 seconds) before triggering a switch.
+
+- **Process Management:** The controller uses non-blocking subprocesses (Popen) to actively terminate the previous model's memory footprint before initializing the next, ensuring the edge device doesn't crash during transitions.
+
+- **Dynamic Selection:**
+If resources are Low (High CPU/RAM), it triggers YOLO11S via yolov11/predict_11s.py.
 If resources are Sufficient, it triggers YOLOv7X via yolov7/detect.py.
 
 ### 📁 Output
@@ -100,6 +116,7 @@ Due to GitHub's file size limitations (100MB max per file on the free tier), we 
 ## 📈 Future Work
 
 - Integrate GPU-based switching
+- Warm-Starting: Implementing background threading to keep the lightweight model "warm" in memory for instantaneous fail-safes.
 - Add LiDAR + camera fusion (multimodal)
 - Deploy to Jetson Nano / Raspberry Pi and benchmark FPS
 - Add alert system (pedestrian crossing, etc.)
